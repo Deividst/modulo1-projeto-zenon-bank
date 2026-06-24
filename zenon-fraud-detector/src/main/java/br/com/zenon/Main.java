@@ -25,10 +25,15 @@ public class Main {
         IO.println(transaction1);
         IO.println(transaction2);
 
+        IO.println("----------------------------------------------------------------------------------------------------");
 
-        List<Transaction> transactions = TransactionIngestor.readTransactions("data/PS_20174392719_1491204439457_log.csv");
+        List<Transaction> transactionsSucess = new TransactionIngestor().readTransactions("data/PS_20174392719_1491204439457_log.csv");
+        transactionsSucess.forEach(System.out::println);
 
-        transactions.forEach(System.out::println);
+        IO.println("----------------------------------------------------------------------------------------------------");
+
+        List<Transaction> transactionsErrors = new TransactionIngestor().readTransactions("data/paysim_with_bad_data.csv");
+        transactionsErrors.forEach(System.out::println);
 
     }
 }
