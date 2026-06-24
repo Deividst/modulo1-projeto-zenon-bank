@@ -7,4 +7,10 @@ public record Customer(
         BigDecimal oldBalance,
         BigDecimal newBalance
 ) {
+
+    public Customer {
+        ValidatorFields.validadeRequiredField("name", name);
+        ValidatorFields.validadeNumberPositive("oldBalance", oldBalance);
+        ValidatorFields.validadeNumberPositive("newBalance", newBalance);
+    }
 }
