@@ -35,5 +35,15 @@ public class Main {
         List<Transaction> transactionsErrors = new TransactionIngestor().readTransactions("data/paysim_with_bad_data.csv");
         transactionsErrors.forEach(System.out::println);
 
+        IO.println("----------------------------------------------------------------------------------------------------");
+
+        List<Transaction> transactions = new TransactionIngestor().readTransactions("data/PS_20174392719_1491204439457_log.csv");
+        FraudAnalyzer.numberFraudulentTransactions(transactions);
+        FraudAnalyzer.top3MostValuableFrauds(transactions);
+        FraudAnalyzer.namesSuspectClients(transactions);
+        FraudAnalyzer.calculateTotalLoss(transactions);
+        FraudAnalyzer.numberFraudsByType(transactions);
+
+        IO.println("----------------------------------------------------------------------------------------------------");
     }
 }
