@@ -11,9 +11,11 @@ public class ValidatorFields {
         }
     }
 
-    public static void validadeIsNumber(String fieldName, String fieldValue) {
-        if (!fieldValue.matches("^-?\\d+(\\.\\d+)?$")) {
-            throw new IllegalArgumentException(fieldName + " should be a number: " + fieldValue);
+    public static void validateIsNumber(String fieldName, String fieldValue) {
+        try {
+            new BigDecimal(fieldValue);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(fieldName + " should be a number: " + fieldValue, e);
         }
     }
 

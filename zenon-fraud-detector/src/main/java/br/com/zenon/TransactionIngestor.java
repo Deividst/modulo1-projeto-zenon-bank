@@ -28,7 +28,7 @@ public class TransactionIngestor {
 
         try (BufferedReader reader = Files.newBufferedReader(Path.of(filePath))) {
             String line;
-            while ((line = reader.readLine()) != null && transactions.size() <= 1000) {
+            while ((line = reader.readLine()) != null && transactions.size() <= 50000) {
 
                 if (!line.startsWith("step")) {
                     createTransation(line).ifPresent(transactions::add);
@@ -62,17 +62,17 @@ public class TransactionIngestor {
 
     private void preValidateFields(String[] transactionColumns) {
         ValidatorFields.validadeRequiredField("step", transactionColumns[STEP_COLUMN]);
-        ValidatorFields.validadeIsNumber("step", transactionColumns[STEP_COLUMN]);
+        ValidatorFields.validateIsNumber("step", transactionColumns[STEP_COLUMN]);
         ValidatorFields.validadeRequiredField("type", transactionColumns[TYPE_COLUMN]);
         ValidatorFields.validadeRequiredField("amount", transactionColumns[AMOUNT_COLUMN]);
-        ValidatorFields.validadeIsNumber("amount", transactionColumns[AMOUNT_COLUMN]);
+        ValidatorFields.validateIsNumber("amount", transactionColumns[AMOUNT_COLUMN]);
         ValidatorFields.validadeRequiredField("oldBalanceOrig", transactionColumns[OLD_BALANCE_ORIG_COLUMN]);
-        ValidatorFields.validadeIsNumber("oldBalanceOrig", transactionColumns[OLD_BALANCE_ORIG_COLUMN]);
+        ValidatorFields.validateIsNumber("oldBalanceOrig", transactionColumns[OLD_BALANCE_ORIG_COLUMN]);
         ValidatorFields.validadeRequiredField("newBalanceOrig", transactionColumns[NEW_BALANCE_ORIG_COLUMN]);
-        ValidatorFields.validadeIsNumber("newBalanceOrig", transactionColumns[NEW_BALANCE_ORIG_COLUMN]);
+        ValidatorFields.validateIsNumber("newBalanceOrig", transactionColumns[NEW_BALANCE_ORIG_COLUMN]);
         ValidatorFields.validadeRequiredField("oldBalanceDest", transactionColumns[OLD_BALANCE_DEST_COLUMN]);
-        ValidatorFields.validadeIsNumber("oldBalanceDest", transactionColumns[NEW_BALANCE_DEST_COLUMN]);
+        ValidatorFields.validateIsNumber("oldBalanceDest", transactionColumns[NEW_BALANCE_DEST_COLUMN]);
         ValidatorFields.validadeRequiredField("newBalanceDest", transactionColumns[OLD_BALANCE_DEST_COLUMN]);
-        ValidatorFields.validadeIsNumber("newBalanceDest", transactionColumns[NEW_BALANCE_DEST_COLUMN]);
+        ValidatorFields.validateIsNumber("newBalanceDest", transactionColumns[NEW_BALANCE_DEST_COLUMN]);
     }
 }
