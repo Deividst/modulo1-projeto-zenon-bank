@@ -2,6 +2,7 @@ package br.com.zenon;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class Main {
     void main() {
@@ -45,5 +46,34 @@ public class Main {
         FraudAnalyzer.numberFraudsByType(transactions);
 
         IO.println("----------------------------------------------------------------------------------------------------");
+
+        TransactionListRepository transactionListRepository = new TransactionListRepository(transactionsSucess);
+
+
+        transactionListRepository.findByCustomerOriginName("C12345").ifPresent(IO::println);
+        transactionListRepository.findByCustomerOriginName("C1231006815").ifPresent(IO::println);
+
+        IO.println("----------------------------------------------------------------------------------------------------");
+
+        IO.println("Consultando a última transação com TransactionListRepository:");
+        long tempoInicioList = System.nanoTime();
+        IO.println("inicio: " + tempoInicioList);
+        transactionListRepository.findByCustomerOriginName("C1868032458").ifPresentOrElse(IO::println, () -> IO.println("Transação não encontrada para o cliente informado"));
+        long tempoFimList = System.nanoTime();
+        IO.println("fim: " + tempoFimList);
+        IO.println("Duração em M/S: " + (tempoFimList - tempoInicioList) / 1_000_000.0);
+
+        IO.println("----------------------------------------------------------------------------------------------------");
+
+        TransactionMapRepository transactionMapRepository = new TransactionMapRepository(transactionsSucess);
+
+        IO.println("Consultando a última transação com TransactionMapRepository:");
+        long tempoInicioMap = System.nanoTime();
+        IO.println("inicio: " + tempoInicioMap);
+        transactionMapRepository.findByCustomerOriginName("C1868032458").ifPresent(IO::println);
+        long tempoFimMap = System.nanoTime();
+        IO.println("fim: " + tempoFimMap);
+        IO.println("Duração em M/S: " + (tempoFimMap - tempoInicioMap) / 1_000_000.0 );
+
     }
 }
