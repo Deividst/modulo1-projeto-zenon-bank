@@ -27,17 +27,17 @@ public class Main {
 
         IO.println("----------------------------------------------------------------------------------------------------");
 
-        List<Transaction> transactionsSucess = new TransactionIngestor().readTransactions("data/PS_20174392719_1491204439457_log.csv");
+        List<Transaction> transactionsSucess = new TransactionIngestor().readTransactionsOldSchool("data/PS_20174392719_1491204439457_log.csv");
         transactionsSucess.forEach(System.out::println);
 
         IO.println("----------------------------------------------------------------------------------------------------");
 
-        List<Transaction> transactionsErrors = new TransactionIngestor().readTransactions("data/paysim_with_bad_data.csv");
+        List<Transaction> transactionsErrors = new TransactionIngestor().readTransactionsOldSchool("data/paysim_with_bad_data.csv");
         transactionsErrors.forEach(System.out::println);
 
         IO.println("----------------------------------------------------------------------------------------------------");
 
-        List<Transaction> transactions = new TransactionIngestor().readTransactions("data/PS_20174392719_1491204439457_log.csv");
+        List<Transaction> transactions = new TransactionIngestor().readTransactionsOldSchool("data/PS_20174392719_1491204439457_log.csv");
         FraudAnalyzer.numberFraudulentTransactions(transactions);
         FraudAnalyzer.top3MostValuableFrauds(transactions);
         FraudAnalyzer.namesSuspectClients(transactions);

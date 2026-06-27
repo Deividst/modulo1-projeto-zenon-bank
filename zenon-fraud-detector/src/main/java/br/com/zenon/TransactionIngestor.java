@@ -23,12 +23,14 @@ public class TransactionIngestor {
     private static final int IS_FRAUD_COLUMN = 9;
     private static final int IS_FLAGGED_FRAUD_COLUMN = 10;
 
-    public List<Transaction> readTransactions(String filePath) {
+    private static final int LIMIT_TRANSACTIONS_LINES = 50000;
+
+    public List<Transaction> readTransactionsOldSchool(String filePath) {
         List<Transaction> transactions = new ArrayList<>();
 
         try (BufferedReader reader = Files.newBufferedReader(Path.of(filePath))) {
             String line;
-            while ((line = reader.readLine()) != null && transactions.size() <= 50000) {
+            while ((line = reader.readLine()) != null && transactions.size() <= LIMIT_TRANSACTIONS_LINES) {
 
                 if (!line.startsWith("step")) {
                     createTransation(line).ifPresent(transactions::add);
@@ -41,6 +43,25 @@ public class TransactionIngestor {
         }
         return transactions;
     }
+
+    public List<Transaction> readTransactionsStreams(String filePath) {
+        Path path = Path.of(filePath);
+        try {
+            List<String> lines = Files.readAllLines(path);
+            return lines.stream()
+                    .skip(1L)
+                    .limit(LIMIT_TRANSACTIONS_LINES)
+                    .map(this::createTransation)
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .toList();
+
+        } catch (IOException e) {
+            System.err.println("Error reading file: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
 
     private Optional<Transaction> createTransation(String line) {
         try {
