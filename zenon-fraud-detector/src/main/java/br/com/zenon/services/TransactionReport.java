@@ -1,4 +1,7 @@
-package br.com.zenon;
+package br.com.zenon.services;
+
+import br.com.zenon.dtos.ReportTransactionDto;
+import br.com.zenon.model.Statistics;
 
 import java.io.BufferedReader;
 import java.io.IOException;

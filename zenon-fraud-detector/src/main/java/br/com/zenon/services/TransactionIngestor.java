@@ -1,4 +1,8 @@
-package br.com.zenon;
+package br.com.zenon.services;
+
+import br.com.zenon.model.TypeTransactionEnum;
+import br.com.zenon.model.Customer;
+import br.com.zenon.model.Transaction;
 
 import java.io.BufferedReader;
 import java.io.IOException;

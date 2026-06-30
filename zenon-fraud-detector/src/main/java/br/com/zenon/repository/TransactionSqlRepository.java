@@ -1,14 +1,15 @@
 package br.com.zenon.repository;
 
 import br.com.zenon.ConnectionFactory;
-import br.com.zenon.Customer;
-import br.com.zenon.Transaction;
-import br.com.zenon.TypeTransactionEnum;
+import br.com.zenon.model.Customer;
+import br.com.zenon.model.Transaction;
+import br.com.zenon.model.TypeTransactionEnum;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Optional;
 
 public class TransactionSqlRepository implements TransactionRepository {
@@ -74,6 +75,34 @@ public class TransactionSqlRepository implements TransactionRepository {
             throw new RuntimeException("Error saving transaction.", e);
         }
 
+    }
+
+    public void saveAll(List<Transaction> transactions) {
+        String query = """
+                INSERT INTO zenon_frauds.TRANSACTIONS
+                (step, `type`, amount, name_origin, old_balance_origin, new_balance_origin, name_dest, old_balance_dest, new_balance_dest, is_fraud, is_flagged_fraud)
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                """;
+
+        try (Connection connection = ConnectionFactory.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+
+            preparedStatement.setInt(1, transaction.step());
+            preparedStatement.setString(2, transaction.type().name());
+            preparedStatement.setBigDecimal(3, transaction.amount());
+            preparedStatement.setString(4, transaction.origin().name());
+            preparedStatement.setBigDecimal(5, transaction.origin().oldBalance());
+            preparedStatement.setBigDecimal(6, transaction.origin().newBalance());
+            preparedStatement.setString(7, transaction.recipient().name());
+            preparedStatement.setBigDecimal(8, transaction.recipient().oldBalance());
+            preparedStatement.setBigDecimal(9, transaction.recipient().newBalance());
+            preparedStatement.setBoolean(10, transaction.isFraud());
+            preparedStatement.setBoolean(11, transaction.isFlaggedFraud());
+
+            preparedStatement.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException("Error saving transaction.", e);
+        }
     }
 
     private Optional<Transaction> mapResultSetToTransaction(ResultSet resultSet) throws SQLException {

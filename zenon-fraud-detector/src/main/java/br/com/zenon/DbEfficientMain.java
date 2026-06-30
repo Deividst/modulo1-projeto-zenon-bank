@@ -7,7 +7,7 @@ import br.com.zenon.services.TransactionIngestor;
 
 import java.util.List;
 
-public class DbMain {
+public class DbEfficientMain {
 
     static void main() {
 

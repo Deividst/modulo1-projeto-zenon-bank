@@ -1,5 +1,8 @@
 package br.com.zenon;
 
+import br.com.zenon.model.Statistics;
+import br.com.zenon.services.TransactionReport;
+
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Currency;
