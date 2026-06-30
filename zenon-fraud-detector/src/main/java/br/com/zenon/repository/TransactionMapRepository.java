@@ -1,4 +1,6 @@
-package br.com.zenon;
+package br.com.zenon.repository;
+
+import br.com.zenon.Transaction;
 
 import java.util.List;
 import java.util.Map;
@@ -20,6 +22,11 @@ public class TransactionMapRepository implements TransactionRepository {
     @Override
     public Optional<Transaction> findByCustomerOriginName(String customerOriginName) {
         return Optional.ofNullable(this.transactions.get(customerOriginName));
+    }
+
+    @Override
+    public void save(Transaction transaction) {
+        this.transactions.putIfAbsent(transaction.origin().name(), transaction);
     }
 
 }
