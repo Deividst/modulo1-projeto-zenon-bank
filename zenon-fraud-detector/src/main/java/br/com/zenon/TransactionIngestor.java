@@ -23,7 +23,7 @@ public class TransactionIngestor {
     private static final int IS_FRAUD_COLUMN = 9;
     private static final int IS_FLAGGED_FRAUD_COLUMN = 10;
 
-    private static final int LIMIT_TRANSACTIONS_LINES = 100000;
+    private static final int LIMIT_TRANSACTIONS_LINES = 10000;
 
     public List<Transaction> readTransactionsOldSchool(String filePath) {
         List<Transaction> transactions = new ArrayList<>();
