@@ -1,12 +1,14 @@
-package br.com.zenon;
+package br.com.zenon.model;
+
+import br.com.zenon.dtos.ReportTransactionDto;
 
 import java.math.BigDecimal;
 
 public record Statistics(long totalTransactions, long totalFrauds, BigDecimal totalAmount) {
 
-    final static Statistics ZERO = new Statistics(0, 0, BigDecimal.ZERO);
+    public final static Statistics ZERO = new Statistics(0, 0, BigDecimal.ZERO);
 
-    Statistics addReportTransaction(ReportTransactionDto reportTransaction) {
+    public Statistics addReportTransaction(ReportTransactionDto reportTransaction) {
         return new Statistics(
                 totalTransactions + 1,
                 totalFrauds() + (reportTransaction.isFraud() ? 1 : 0),
@@ -14,7 +16,7 @@ public record Statistics(long totalTransactions, long totalFrauds, BigDecimal to
         );
     }
 
-    Statistics add(Statistics statistics) {
+    public Statistics add(Statistics statistics) {
         return new Statistics(
                 totalTransactions + statistics.totalTransactions,
                 totalFrauds + statistics.totalFrauds,

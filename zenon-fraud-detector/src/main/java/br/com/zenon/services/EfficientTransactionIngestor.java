@@ -1,16 +1,23 @@
-package br.com.zenon;
+package br.com.zenon.services;
 
-import java.io.BufferedReader;
+import br.com.zenon.model.Customer;
+import br.com.zenon.model.Transaction;
+import br.com.zenon.model.TypeTransactionEnum;
+
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 
-public class TransactionIngestor {
-
+public class EfficientTransactionIngestor {
     private static final int STEP_COLUMN = 0;
     private static final int TYPE_COLUMN = 1;
     private static final int AMOUNT_COLUMN = 2;
@@ -24,44 +31,67 @@ public class TransactionIngestor {
     private static final int IS_FLAGGED_FRAUD_COLUMN = 10;
 
     private static final int LIMIT_TRANSACTIONS_LINES = 10000;
+    private static final int LINE_BATCH_SIZE = 5000;
 
-    public List<Transaction> readTransactionsOldSchool(String filePath) {
-        List<Transaction> transactions = new ArrayList<>();
+    public void readAsBatch(String filePath, Consumer<List<Transaction>> batchConsumer) {
+        Path path = Path.of(filePath);
+        try (ExecutorService executorService = Executors.newFixedThreadPool(10);
+             Stream<String> lines = Files.lines(path).skip(1)) {
 
-        try (BufferedReader reader = Files.newBufferedReader(Path.of(filePath))) {
-            String line;
-            while ((line = reader.readLine()) != null && transactions.size() <= LIMIT_TRANSACTIONS_LINES) {
+            Iterator<String> iterator = lines.iterator();
 
-                if (!line.startsWith("step")) {
-                    createTransation(line).ifPresent(transactions::add);
+            List<String> lineBatch = new ArrayList<>();
+            while (iterator.hasNext()) {
+                String line = iterator.next();
+                lineBatch.add(line);
+
+                if (lineBatch.size() >= LINE_BATCH_SIZE) {
+                    IO.println("Processing batch " + lineBatch.size() + " transactions.");
+                    final List<String> concurrentLineBatch = List.copyOf(lineBatch);
+                    executorService.submit(() -> executeBatch(concurrentLineBatch, batchConsumer));
+                    lineBatch.clear();
                 }
-
             }
+
+            if (!lineBatch.isEmpty()) {
+                IO.println("Processing final batch " + lineBatch.size() + " transactions.");
+                final List<String> concurrentLineBatch = List.copyOf(lineBatch);
+                executorService.submit(() -> executeBatch(concurrentLineBatch, batchConsumer));
+            }
+
         } catch (IOException e) {
             System.err.println("Error reading file: " + e.getMessage());
             throw new RuntimeException(e);
         }
-        return transactions;
     }
 
-    public List<Transaction> readTransactionsStreams(String filePath) {
+    private void executeBatch(List<String> lineBatch, Consumer<List<Transaction>> batchConsumer) {
+        IO.println("Thread: " + Thread.currentThread().getName());
+        List<Transaction> transactions = lineBatch.stream()
+                .map(this::createTransation)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .toList();
+
+        batchConsumer.accept(transactions);
+    }
+
+    public void readAsStream(String filePath, Consumer<Transaction> consumer) {
         Path path = Path.of(filePath);
-        try {
-            List<String> lines = Files.readAllLines(path);
-            return lines.stream()
+        try (Stream<String> lines = Files.lines(path)) {
+            lines
                     .skip(1L)
                     .limit(LIMIT_TRANSACTIONS_LINES)
                     .map(this::createTransation)
                     .filter(Optional::isPresent)
                     .map(Optional::get)
-                    .toList();
+                    .forEach(consumer);
 
         } catch (IOException e) {
             System.err.println("Error reading file: " + e.getMessage());
             throw new RuntimeException(e);
         }
     }
-
 
     private Optional<Transaction> createTransation(String line) {
         try {
@@ -96,4 +126,5 @@ public class TransactionIngestor {
         ValidatorFields.validadeRequiredField("newBalanceDest", transactionColumns[OLD_BALANCE_DEST_COLUMN]);
         ValidatorFields.validateIsNumber("newBalanceDest", transactionColumns[NEW_BALANCE_DEST_COLUMN]);
     }
+
 }

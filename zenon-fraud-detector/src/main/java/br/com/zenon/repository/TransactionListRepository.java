@@ -1,6 +1,6 @@
 package br.com.zenon.repository;
 
-import br.com.zenon.Transaction;
+import br.com.zenon.model.Transaction;
 
 import java.util.List;
 import java.util.Optional;
