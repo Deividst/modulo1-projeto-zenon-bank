@@ -84,22 +84,43 @@ public class TransactionSqlRepository implements TransactionRepository {
                 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
                 """;
 
-        try (Connection connection = ConnectionFactory.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+        try (Connection connection = ConnectionFactory.getConnection()) {
+            connection.setAutoCommit(false);
 
-            preparedStatement.setInt(1, transaction.step());
-            preparedStatement.setString(2, transaction.type().name());
-            preparedStatement.setBigDecimal(3, transaction.amount());
-            preparedStatement.setString(4, transaction.origin().name());
-            preparedStatement.setBigDecimal(5, transaction.origin().oldBalance());
-            preparedStatement.setBigDecimal(6, transaction.origin().newBalance());
-            preparedStatement.setString(7, transaction.recipient().name());
-            preparedStatement.setBigDecimal(8, transaction.recipient().oldBalance());
-            preparedStatement.setBigDecimal(9, transaction.recipient().newBalance());
-            preparedStatement.setBoolean(10, transaction.isFraud());
-            preparedStatement.setBoolean(11, transaction.isFlaggedFraud());
+            int batchSize = 0;
+            try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+                for (Transaction transaction : transactions) {
+                    preparedStatement.setInt(1, transaction.step());
+                    preparedStatement.setString(2, transaction.type().name());
+                    preparedStatement.setBigDecimal(3, transaction.amount());
+                    preparedStatement.setString(4, transaction.origin().name());
+                    preparedStatement.setBigDecimal(5, transaction.origin().oldBalance());
+                    preparedStatement.setBigDecimal(6, transaction.origin().newBalance());
+                    preparedStatement.setString(7, transaction.recipient().name());
+                    preparedStatement.setBigDecimal(8, transaction.recipient().oldBalance());
+                    preparedStatement.setBigDecimal(9, transaction.recipient().newBalance());
+                    preparedStatement.setBoolean(10, transaction.isFraud());
+                    preparedStatement.setBoolean(11, transaction.isFlaggedFraud());
 
-            preparedStatement.execute();
+                    if (batchSize % 2_500 == 0) {
+                        preparedStatement.executeBatch();
+                        connection.commit();
+                    }
+
+                    preparedStatement.addBatch();
+                    batchSize++;
+
+                }
+
+                preparedStatement.executeBatch();
+                connection.commit();
+                connection.setAutoCommit(true);
+
+            } catch (SQLException e) {
+                connection.rollback();
+                throw new RuntimeException("Error saving transaction.", e);
+            }
+
         } catch (SQLException e) {
             throw new RuntimeException("Error saving transaction.", e);
         }
